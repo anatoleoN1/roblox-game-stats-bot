@@ -23,7 +23,7 @@ const REFRESH_INTERVAL = 5;
 // ----------------- UPDATE FUNCTION ----------------
 import fetch from "node-fetch"; // si pas déjà importé
 
-const LOCAL_VERSION = "1.2.3"; // ta version actuelle
+const LOCAL_VERSION = "1.2.30"; // ta version actuelle
 
 async function checkForUpdates() {
   try {
