@@ -50,6 +50,10 @@ The bot automatically refreshes every few seconds and updates the same Discord m
    ```bash
    npm install
 
+   if necessary type
+   ```bash
+   npm audit fix --force
+
 6. Run the bot:
    ```bash
    node bot.js
@@ -68,6 +72,10 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 4. Install dependencies:
    ```powershell
    npm install
+   
+   if necessary type
+   ```powershell
+   npm audit fix --force
 
 5. Run the bot:
    ```powershell
@@ -94,6 +102,10 @@ The bot automatically refreshes every few seconds and updates the same Discord m
    ```bash
    npm install
 
+   if necessary type
+   ```bash
+   npm audit fix --force
+
 5. Run the bot:
    ```bash
    node bot.js
@@ -115,7 +127,7 @@ Footer: created by @anatoleo, powered by IA. V1.2.11
 
 ---
 ## UPDATES
-#### 1.2.32
+#### 1.2.33
 added package.json for ease of installation
 
 #### 1.2.30
