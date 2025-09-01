@@ -43,7 +43,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 
 4. Clone the repository:
    ```bash
-   git clone https://github.com/anatoleoN1/roblox-stats-discord.git
+   git clone https://github.com/anatoleoN1/roblox-game-stats-bot
    cd roblox-stats-discord
 
 5. Install dependencies:
@@ -57,12 +57,12 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 ---
 
 ### WINDOWS
-1. Install Node.js (https://nodejs.org/en/download/?utm_source=chatgpt.com)
+1. Install [Node.js](https://nodejs.org/en/download/?utm_source=chatgpt.com)
  (choose the LTS version).
 2. Open Command Prompt or PowerShell.
 3. Clone the repository:
    ```powershell
-   git clone https://github.com/anatoleoN1/roblox-stats-discord.git
+   git clone https://github.com/anatoleoN1/roblox-game-stats-bot
    cd roblox-stats-discord
 
 4. Install dependencies:
@@ -88,7 +88,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 
 3. Clone the repository:
    ```bash
-   git clone https://github.com/anatoleoN1/roblox-stats-discord.git
+   git clone https://github.com/anatoleoN1/roblox-game-stats-bot
    cd roblox-stats-discord
 
 4. Install dependencies:
