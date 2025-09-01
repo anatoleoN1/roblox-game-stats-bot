@@ -11,23 +11,20 @@ import inquirer from "inquirer";
 import fetch from "node-fetch";
 
 // ----------------- UPDATE FUNCTION ----------------
-const LOCAL_VERSION = "1.2.33"; // ta version actuelle
+const LOCAL_VERSION = "1.2.33";
 
 async function checkForUpdates() {
   try {
-    // URL brute du fichier sur GitHub
     const url = "https://raw.githubusercontent.com/anatoleoN1/roblox-game-stats-bot/main/bot.js";
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const remoteFile = await response.text();
 
-    // Recherche de la version dans le fichier distant
-    const versionMatch = remoteFile.match(/const version\s*=\s*["'](\d+\.\d+\.\d+)["']/);
+    const versionMatch = remoteFile.match(/const LOCAL_VERSION\s*=\s*["'](\d+\.\d+\.\d+)["']/);
     if (!versionMatch) return;
 
     const remoteVersion = versionMatch[1];
 
-    // Comparaison simple
     const localParts = LOCAL_VERSION.split(".").map(Number);
     const remoteParts = remoteVersion.split(".").map(Number);
 
@@ -50,14 +47,12 @@ async function checkForUpdates() {
     } else {
       console.log(`✅ Bot is up to date (version ${LOCAL_VERSION})\n`);
     }
-
   } catch (error) {
     console.log("❌ Failed to check for updates:", error.message);
   }
 }
 
 //----------------DEFINITION VARIABLES---------------
-
 let WEBHOOK_URL = null;
 let PLACE_ID = null;
 let universeId = null;
@@ -66,13 +61,9 @@ let discordMessageId = null;
 let gameName = "Roblox Game";
 let gameIcon = "https://tr.rbxcdn.com/97425ef88919c45c2fc8b1c616eec95d/150/150/Image/Png";
 
-// Refresh interval in seconds
 const REFRESH_INTERVAL = 5;
 
-
-
 // ------------------ API FUNCTIONS ------------------
-
 async function fetchUniverseId(placeId) {
   const res = await fetch(`https://apis.roproxy.com/universes/v1/places/${placeId}/universe`);
   const data = await res.json();
@@ -84,8 +75,7 @@ async function fetchGameInfo(universeId) {
   const data = await res.json();
   const entry = data.data[0];
   gameName = entry.name || "Roblox Game";
-  
-  // Fetch game icon
+
   const iconRes = await fetch(
     `https://thumbnails.roproxy.com/v1/games/icons?universeIds=${universeId}&size=256x256&format=Png`
   );
@@ -116,19 +106,17 @@ async function fetchGameStats(universeId) {
       visits: entry.visits ?? 0,
       favorites: favJson.favoritesCount ?? 0
     };
-
   } catch (err) {
     console.error("API error:", err.message || err);
     return { playing: "N/A", visits: "N/A", favorites: "N/A" };
   }
 }
 
-
 // ------------------ DISCORD FUNCTIONS ------------------
-
 function buildEmbed(stats) {
   const now = new Date();
-  const utcString = now.toISOString(); // UTC+0
+  const utcString = now.toISOString();
+
   return {
     username: gameName,
     avatar_url: gameIcon,
@@ -150,7 +138,6 @@ function buildEmbed(stats) {
   };
 }
 
-
 async function updateStats() {
   if (!universeId) universeId = await fetchUniverseId(PLACE_ID);
   if (!gameName || gameName === "Roblox Game") await fetchGameInfo(universeId);
@@ -160,7 +147,6 @@ async function updateStats() {
 
   try {
     if (!discordMessageId) {
-      // First message
       const res = await fetch(WEBHOOK_URL + "?wait=true", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -170,7 +156,6 @@ async function updateStats() {
       discordMessageId = data.id;
       console.log("✅ First message sent to Discord");
     } else {
-      // Edit message
       await fetch(`${WEBHOOK_URL}/messages/${discordMessageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -185,16 +170,13 @@ async function updateStats() {
   }
 }
 
-
 // ------------------ MAIN ------------------
-
 async function main() {
   console.log("=== ROBLOX STATS BOT → DISCORD ===\n");
 
-  // Appel de la fonction avant de lancer le bot
+  // --- Check version before prompts ---
   await checkForUpdates();
-  
-  // Interactive setup
+
   const answers = await inquirer.prompt([
     {
       type: "input",
@@ -229,7 +211,6 @@ async function main() {
       }
     ]);
 
-    // Extract ID if a full link is provided
     const linkParts = messageAnswer.messageId.split("/");
     discordMessageId = linkParts[linkParts.length - 1];
     console.log(`✅ Existing message will be updated: ${discordMessageId}`);
@@ -242,10 +223,8 @@ async function main() {
   console.log(`📩 Discord Webhook: ${WEBHOOK_URL}`);
   console.log(`⏳ Refresh every ${REFRESH_INTERVAL} sec\n`);
 
-  // Start loop
   setInterval(updateStats, REFRESH_INTERVAL * 1000);
   updateStats();
 }
-
 
 main();
