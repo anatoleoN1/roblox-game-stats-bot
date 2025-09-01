@@ -44,7 +44,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 4. Clone the repository:
    ```bash
    git clone https://github.com/anatoleoN1/roblox-game-stats-bot
-   cd roblox-stats-discord
+   cd roblox-game-stats-bot
 
 5. Install dependencies:
    ```bash
@@ -63,7 +63,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 3. Clone the repository:
    ```powershell
    git clone https://github.com/anatoleoN1/roblox-game-stats-bot
-   cd roblox-stats-discord
+   cd roblox-game-stats-bot
 
 4. Install dependencies:
    ```powershell
@@ -89,7 +89,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 3. Clone the repository:
    ```bash
    git clone https://github.com/anatoleoN1/roblox-game-stats-bot
-   cd roblox-stats-discord
+   cd roblox-game-stats-bot
 
 4. Install dependencies:
    ```bash
