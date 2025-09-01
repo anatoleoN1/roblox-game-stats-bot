@@ -1,5 +1,9 @@
 # Roblox Stats → Discord Webhook Bot
 
+![Node.js CI](https://img.shields.io/badge/node-%3E%3D18-green)  
+![Version](https://img.shields.io/badge/version-1.2.11-blue)  
+![License](https://img.shields.io/badge/license-CC--BY%204.0-yellow)
+
 A Node.js bot that tracks live statistics of any Roblox game and posts them into a Discord channel via a webhook.  
 The bot automatically refreshes every few seconds and updates the same Discord message instead of creating new ones.  
 
@@ -113,3 +117,4 @@ Footer: created by @anatoleo, powered by IA. V1.2.11
 ---
 
 ## License
+Roblox Stats Discord Bot © 2025 by Anatoleo is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/
