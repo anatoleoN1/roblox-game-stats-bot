@@ -23,7 +23,7 @@ const REFRESH_INTERVAL = 5;
 // ----------------- UPDATE FUNCTION ----------------
 import fetch from "node-fetch"; // si pas déjà importé
 
-const LOCAL_VERSION = "1.2.32"; // ta version actuelle
+const LOCAL_VERSION = "1.2.33"; // ta version actuelle
 
 async function checkForUpdates() {
   try {
@@ -142,7 +142,7 @@ function buildEmbed(stats) {
           { name: "Favorites", value: `${stats.favorites}`, inline: true }
         ],
         footer: {
-          text: "Roblox Stats Discord Bot © 2025 by Anatoleo is licensed under CC BY 4.0 | created by @anatoleo, powered by IA. V1.2.20"
+          text: "Roblox Stats Discord Bot © 2025 by Anatoleo is licensed under CC BY 4.0 | created by @anatoleo, powered by IA. V1.2.33"
         },
         timestamp: utcString
       }
