@@ -56,9 +56,6 @@ async function checkForUpdates() {
   }
 }
 
-// Appel de la fonction avant de lancer le bot
-await checkForUpdates();
-
 //----------------DEFINITION VARIABLES---------------
 
 let WEBHOOK_URL = null;
@@ -194,6 +191,9 @@ async function updateStats() {
 async function main() {
   console.log("=== ROBLOX STATS BOT → DISCORD ===\n");
 
+  // Appel de la fonction avant de lancer le bot
+  await checkForUpdates();
+  
   // Interactive setup
   const answers = await inquirer.prompt([
     {
