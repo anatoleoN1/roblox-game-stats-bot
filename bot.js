@@ -20,6 +20,57 @@ let gameIcon = "https://tr.rbxcdn.com/97425ef88919c45c2fc8b1c616eec95d/150/150/I
 // Refresh interval in seconds
 const REFRESH_INTERVAL = 5;
 
+// ----------------- UPDATE FUNCTION ----------------
+import fetch from "node-fetch"; // si pas déjà importé
+
+const LOCAL_VERSION = "1.2.3"; // ta version actuelle
+
+async function checkForUpdates() {
+  try {
+    // URL brute du fichier sur GitHub
+    const url = "https://raw.githubusercontent.com/anatoleoN1/roblox-game-stats-bot/main/bot.js";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const remoteFile = await response.text();
+
+    // Recherche de la version dans le fichier distant
+    const versionMatch = remoteFile.match(/const version\s*=\s*["'](\d+\.\d+\.\d+)["']/);
+    if (!versionMatch) return;
+
+    const remoteVersion = versionMatch[1];
+
+    // Comparaison simple
+    const localParts = LOCAL_VERSION.split(".").map(Number);
+    const remoteParts = remoteVersion.split(".").map(Number);
+
+    let isRemoteNewer = false;
+    for (let i = 0; i < 3; i++) {
+      if (remoteParts[i] > localParts[i]) {
+        isRemoteNewer = true;
+        break;
+      } else if (remoteParts[i] < localParts[i]) {
+        break;
+      }
+    }
+
+    if (isRemoteNewer) {
+      console.log("------------------------------------------------------------");
+      console.log(`⚠️  Update available! Your version: ${LOCAL_VERSION}, Latest version: ${remoteVersion}`);
+      console.log("To update the bot, run:");
+      console.log("git pull https://github.com/anatoleoN1/roblox-game-stats-bot.git");
+      console.log("------------------------------------------------------------\n");
+    } else {
+      console.log(`✅ Bot is up to date (version ${LOCAL_VERSION})\n`);
+    }
+
+  } catch (error) {
+    console.log("❌ Failed to check for updates:", error.message);
+  }
+}
+
+// Appel de la fonction avant de lancer le bot
+await checkForUpdates();
+
 // ------------------ API FUNCTIONS ------------------
 
 async function fetchUniverseId(placeId) {
