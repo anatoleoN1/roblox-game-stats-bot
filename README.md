@@ -1,7 +1,7 @@
 # Roblox Stats → Discord Webhook Bot
 
 ![Node.js CI](https://img.shields.io/badge/node-%3E%3D18-green)  
-![Version](https://img.shields.io/badge/version-1.2.11-blue)  
+![Version](https://img.shields.io/badge/version-1.2.20-blue)  
 ![License](https://img.shields.io/badge/license-CC--BY%204.0-yellow)
 
 A Node.js bot that tracks live statistics of any Roblox game and posts them into a Discord channel via a webhook.  
@@ -113,6 +113,38 @@ Title: Live Stats — Vorton Alpha
 - Visits: 42,000
 - Favorites: 900
 Footer: created by @anatoleo, powered by IA. V1.2.11
+
+---
+## UPDATES
+# 1.2.20
+added a function to reuse an old message
+
+# 1.2.11
+added a graphical interface to find bugs more easily
+
+#### 1.2.10
+3 bug fix:
+- crash bug
+- internet bug
+- speed bug
+
+### 1.2
+added inquerer for:
+- choose game URL
+- choose webhook URl
+sent message interface changed
+
+#### 1.1.3
+server-based bot project, abandoned
+
+### 1.1
+bot deployment
+
+#### 1.0.9
+modifying the bot to prepare it for deployment
+
+### 1
+creation of the bot
 
 ---
 
