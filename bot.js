@@ -83,9 +83,8 @@ function buildEmbed(stats) {
           { name: "Visits", value: `${stats.visits}`, inline: true },
           { name: "Favorites", value: `${stats.favorites}`, inline: true }
         ],
-        description: `<a href="https://github.com/anatoleoN1/roblox-game-stats-bot">Roblox Stats Discord Bot</a> © 2025 by <a href="https://github.com/anatoleoN1">Anatoleo</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">`,
         footer: {
-          text: "Roblox Stats Discord Bot © 2025 by Anatoleo is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/ | created by @anatoleo, powered by IA. V1.2.20"
+          text: "Roblox Stats Discord Bot © 2025 by Anatoleo is licensed under CC BY 4.0 | created by @anatoleo, powered by IA. V1.2.20"
         },
         timestamp: utcString
       }
