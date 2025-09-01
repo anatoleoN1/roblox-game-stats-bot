@@ -18,7 +18,8 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 
 ## Requirements
 - Node.js 18+  
-- npm (comes with Node.js)  
+- npm (comes with Node.js)
+- inquerer (come with Node.js)
 
 ---
 
@@ -30,3 +31,85 @@ The bot automatically refreshes every few seconds and updates the same Discord m
    ```bash
    sudo apt update
    sudo apt install -y nodejs npm
+
+3. check versions:
+   ```bash
+   node -v
+   npm -v
+
+4. Clone the repository:
+   ```bash
+   git clone https://github.com/anatoleoN1/roblox-stats-discord.git
+   cd roblox-stats-discord
+
+5. Install dependencies:
+   ```bash
+   npm install inquirer
+
+6. Run the bot:
+   ```bash
+   node bot.js
+
+---
+
+### WINDOWS
+1. Install Node.js (https://nodejs.org/en/download/?utm_source=chatgpt.com)
+ (choose the LTS version).
+2. Open Command Prompt or PowerShell.
+3. Clone the repository:
+   ```powershell
+   git clone https://github.com/anatoleoN1/roblox-stats-discord.git
+   cd roblox-stats-discord
+
+4. Install dependencies:
+   ```powershell
+   npm install
+   npm install inquirer
+
+5. Run the bot:
+   ```powershell
+   node bot.js
+
+---
+
+### MacOS
+1. Install Node.js and npm using Homebrew (if not already installed):  
+   ```bash
+   brew install node
+
+2. check versions:
+   ```bash
+   node -v
+   npm -v
+
+3. Clone the repository:
+   ```bash
+   git clone https://github.com/anatoleoN1/roblox-stats-discord.git
+   cd roblox-stats-discord
+
+4. Install dependencies:
+   ```bash
+   npm install inquirer
+
+5. Run the bot:
+   ```bash
+   node bot.js
+
+---
+
+## Configuration
+- Refresh interval: change the REFRESH_INTERVAL constant in bot.js (default is 5 seconds).
+- Error handling: if Roblox API is unavailable, the bot shows N/A instead of crashing.
+
+---
+
+## Example
+Title: Live Stats — Vorton Alpha
+- Players Online: 123
+- Visits: 42,000
+- Favorites: 900
+Footer: created by @anatoleo, powered by IA. V1.2.11
+
+---
+
+## License
