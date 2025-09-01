@@ -15,7 +15,7 @@ const LOCAL_VERSION = "1.2.34";
 
 async function checkForUpdates() {
   try {
-    const url = "https://raw.githubusercontent.com/anatoleoN1/roblox-game-stats-bot/main/bot.js";
+    const url = "https://github.com/anatoleoN1/roblox-game-stats-bot/blob/main/bot.js";
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const remoteFile = await response.text();
