@@ -47,24 +47,31 @@ async function fetchGameInfo(universeId) {
 async function fetchGameStats(universeId) {
   try {
     const [statsRes, favRes] = await Promise.all([
-      fetch(`https://games.roproxy.com/v1/games?universeIds=${universeId}`),
-      fetch(`https://games.roproxy.com/v1/games/${universeId}/favorites/count`)
+      fetch(`https://games.roproxy.com/v1/games?universeIds=${universeId}`, { signal: AbortSignal.timeout(15000) }),
+      fetch(`https://games.roproxy.com/v1/games/${universeId}/favorites/count`, { signal: AbortSignal.timeout(15000) })
     ]);
 
     const statsJson = await statsRes.json();
-    const entry = statsJson.data[0];
+    const entry = statsJson?.data && statsJson.data.length > 0 ? statsJson.data[0] : null;
     const favJson = await favRes.json();
 
+    if (!entry) {
+      console.warn("⚠️ No data returned from Roblox API");
+      return { playing: 0, visits: 0, favorites: 0 };
+    }
+
     return {
-      playing: entry.playing,
-      visits: entry.visits,
-      favorites: favJson.favoritesCount
+      playing: entry.playing ?? 0,
+      visits: entry.visits ?? 0,
+      favorites: favJson.favoritesCount ?? 0
     };
+
   } catch (err) {
-    console.error("API error:", err);
-    return { playing: "?", visits: "?", favorites: "?" };
+    console.error("API error:", err.message || err);
+    return { playing: "N/A", visits: "N/A", favorites: "N/A" };
   }
 }
+
 
 // ------------------ DISCORD FUNCTIONS ------------------
 
