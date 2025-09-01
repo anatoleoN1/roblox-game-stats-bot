@@ -11,7 +11,7 @@ import inquirer from "inquirer";
 import fetch from "node-fetch";
 
 // ----------------- UPDATE FUNCTION ----------------
-const LOCAL_VERSION = "1.2.33";
+const LOCAL_VERSION = "1.2.34";
 
 async function checkForUpdates() {
   try {
