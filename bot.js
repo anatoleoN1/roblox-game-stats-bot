@@ -8,21 +8,9 @@
 //   3. Bot will send stats every REFRESH_INTERVAL seconds, editing the same message
 
 import inquirer from "inquirer";
-
-let WEBHOOK_URL = null;
-let PLACE_ID = null;
-let universeId = null;
-let discordMessageId = null;
-
-let gameName = "Roblox Game";
-let gameIcon = "https://tr.rbxcdn.com/97425ef88919c45c2fc8b1c616eec95d/150/150/Image/Png";
-
-// Refresh interval in seconds
-const REFRESH_INTERVAL = 5;
+import fetch from "node-fetch";
 
 // ----------------- UPDATE FUNCTION ----------------
-import fetch from "node-fetch"; // si pas déjà importé
-
 const LOCAL_VERSION = "1.2.33"; // ta version actuelle
 
 async function checkForUpdates() {
@@ -70,6 +58,21 @@ async function checkForUpdates() {
 
 // Appel de la fonction avant de lancer le bot
 await checkForUpdates();
+
+//----------------DEFINITION VARIABLES---------------
+
+let WEBHOOK_URL = null;
+let PLACE_ID = null;
+let universeId = null;
+let discordMessageId = null;
+
+let gameName = "Roblox Game";
+let gameIcon = "https://tr.rbxcdn.com/97425ef88919c45c2fc8b1c616eec95d/150/150/Image/Png";
+
+// Refresh interval in seconds
+const REFRESH_INTERVAL = 5;
+
+
 
 // ------------------ API FUNCTIONS ------------------
 
