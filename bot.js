@@ -79,7 +79,7 @@ async function checkForUpdates() {
 
     if (isRemoteNewer(LOCAL_VERSION, tag)) {
       console.log("⚠️  Update available! Current:", LOCAL_VERSION, "Latest:", tag);
-      console.log("To update: git pull or download latest release");
+      console.log("To update: git reset --hard git pull or download latest release");
     } else {
       console.log(`✅ Bot is up to date (version ${LOCAL_VERSION})\n`);
     }
