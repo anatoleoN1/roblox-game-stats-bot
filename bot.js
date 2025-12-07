@@ -1,11 +1,12 @@
-// bot.js — Roblox Stats Bot (V1.2.41) — VERSION ROBUSTE
+// bot.js — Roblox Stats Bot (V1.2.41) — VERSION AUTO-ADAPTATIVE
 import inquirer from "inquirer";
 import fetch from "node-fetch";
 
 // ----------------- CONFIG -----------------
-const LOCAL_VERSION = "V1.2.5";
+const LOCAL_VERSION = "V1.2.41";
 const GITHUB_RELEASES_LATEST = "https://api.github.com/repos/anatoleoN1/roblox-game-stats-bot/releases/latest";
-const REFRESH_INTERVAL = 30; // secondes
+const MIN_REFRESH_INTERVAL = 30; // secondes
+const MAX_REFRESH_INTERVAL = 300; // max 5 minutes
 const FETCH_TIMEOUT_MS = 30000; // 30s
 const MAX_RETRIES_429 = 5; // max retries pour 429
 const BASE_DELAY = 1000; // délai initial pour backoff exponentiel (ms)
@@ -18,6 +19,9 @@ let discordMessageId = null;
 
 let gameName = "Roblox Game";
 let gameIcon = "https://tr.rbxcdn.com/97425ef88919c45c2fc8b1c616eec95d/150/150/Image/Png";
+
+let currentInterval = MIN_REFRESH_INTERVAL; // intervalle actuel (s)
+let consecutiveSuccess = 0;
 
 // ----------------- HELPERS -----------------
 function normalizeVersion(tag) {
@@ -54,7 +58,7 @@ async function fetchWithBackoff(url, options = {}, maxRetries = MAX_RETRIES_429,
         await sleep(delay);
         continue;
       }
-      return res;
+      return res; // ok ou autre erreur HTTP
     } catch (err) {
       const delay = baseDelay * Math.pow(2, attempt);
       console.warn("⚠️ Fetch error:", err.message || err, `Retrying in ${delay / 1000}s`);
@@ -160,20 +164,22 @@ function buildEmbed(stats) {
 }
 
 async function updateStats() {
+  let had429 = false;
+
   if (!universeId) {
     universeId = await fetchUniverseId(PLACE_ID);
     if (!universeId) {
       console.warn("❌ Could not resolve universeId; retrying next cycle");
-      return;
+      had429 = true;
     }
   }
 
   if (!gameName || gameName === "Roblox Game" || gameName === "Unknown Game") {
-    await fetchGameInfo(universeId);
+    await fetchGameInfo(universeId).catch(() => { had429 = true; });
   }
 
-  const stats = await fetchGameStats(universeId);
-  const payload = buildEmbed(stats);
+  const stats = await fetchGameStats(universeId).catch(() => { had429 = true; });
+  const payload = buildEmbed(stats || { playing: "N/A", visits: "N/A", favorites: "N/A" });
 
   try {
     if (!discordMessageId) {
@@ -202,7 +208,24 @@ async function updateStats() {
     }
   } catch (err) {
     console.error("❌ Discord error:", err.message || err);
+    had429 = true;
   }
+
+  // Ajustement automatique de l’intervalle
+  if (had429) {
+    currentInterval = Math.min(MAX_REFRESH_INTERVAL, currentInterval * 1.5);
+    consecutiveSuccess = 0;
+  } else {
+    consecutiveSuccess++;
+    if (consecutiveSuccess >= 3) {
+      currentInterval = Math.max(MIN_REFRESH_INTERVAL, currentInterval * 0.9);
+      consecutiveSuccess = 0;
+    }
+  }
+
+  // Planifier le prochain update
+  setTimeout(updateStats, currentInterval * 1000);
+  console.log(`⏳ Next update in ${Math.round(currentInterval)} sec`);
 }
 
 // ----------------- MAIN -----------------
@@ -250,9 +273,8 @@ async function main() {
 
   console.log(`🎮 Roblox Game ID: ${PLACE_ID}`);
   console.log(`📩 Discord Webhook: ${WEBHOOK_URL}`);
-  console.log(`⏳ Refresh every ${REFRESH_INTERVAL} sec\n`);
+  console.log(`⏳ Initial refresh interval: ${currentInterval} sec\n`);
 
-  setInterval(updateStats, REFRESH_INTERVAL * 1000);
   updateStats();
 }
 
