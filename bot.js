@@ -3,7 +3,7 @@ import inquirer from "inquirer";
 import fetch from "node-fetch";
 
 // ----------------- CONFIG -----------------
-const LOCAL_VERSION = "V1.2.41";
+const LOCAL_VERSION = "V1.2.51";
 const GITHUB_RELEASES_LATEST = "https://api.github.com/repos/anatoleoN1/roblox-game-stats-bot/releases/latest";
 const MIN_REFRESH_INTERVAL = 30; // secondes
 const MAX_REFRESH_INTERVAL = 300; // max 5 minutes
