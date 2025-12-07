@@ -1,7 +1,7 @@
 {
   "name": "roblox-game-stats-bot",
-  "version": "1.2.35",
-  "description": "A Node.js bot that tracks live statistics of any Roblox game and posts them into a Discord channel via a webhook.",
+  "version": "1.2.41",
+  "description": "A Node.js bot that tracks live statistics of any Roblox game and posts them into a Discord channel with a webhook.",
   "main": "bot.js",
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
   "author": "Anatoleo",
   "license": "CC-BY-4.0",
   "dependencies": {
-    "node-fetch": "^3.3.2",
-    "inquirer": "^9.2.7"
+    "inquirer": "^12.9.4",
+    "node-fetch": "^3.3.2"
   }
 }
