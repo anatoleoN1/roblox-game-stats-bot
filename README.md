@@ -49,7 +49,8 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 5. Install dependencies:
    ```bash
    npm install
-
+   ```
+   
    if necessary type
    ```bash
    npm audit fix --force
@@ -72,6 +73,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 4. Install dependencies:
    ```powershell
    npm install
+   ```
    
    if necessary type
    ```powershell
@@ -101,6 +103,7 @@ The bot automatically refreshes every few seconds and updates the same Discord m
 4. Install dependencies:
    ```bash
    npm install
+   ```
 
    if necessary type
    ```bash
