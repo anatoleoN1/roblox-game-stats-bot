@@ -1,19 +1,14 @@
-// bot.js — Roblox Stats Bot (V1.2.41)
-// Requirements: Node.js 18+
-// Dependencies: inquirer, node-fetch
-//
-// Usage:
-//   npm install
-//   node bot.js
-
+// bot.js — Roblox Stats Bot (V1.2.41) — VERSION ROBUSTE
 import inquirer from "inquirer";
 import fetch from "node-fetch";
 
 // ----------------- CONFIG -----------------
-const LOCAL_VERSION = "V1.2.41";
+const LOCAL_VERSION = "V1.2.5";
 const GITHUB_RELEASES_LATEST = "https://api.github.com/repos/anatoleoN1/roblox-game-stats-bot/releases/latest";
-const REFRESH_INTERVAL = 20; // seconds
+const REFRESH_INTERVAL = 30; // secondes
 const FETCH_TIMEOUT_MS = 30000; // 30s
+const MAX_RETRIES_429 = 5; // max retries pour 429
+const BASE_DELAY = 1000; // délai initial pour backoff exponentiel (ms)
 
 // ----------------- STATE -----------------
 let WEBHOOK_URL = null;
@@ -26,11 +21,9 @@ let gameIcon = "https://tr.rbxcdn.com/97425ef88919c45c2fc8b1c616eec95d/150/150/I
 
 // ----------------- HELPERS -----------------
 function normalizeVersion(tag) {
-  // Accepts "V1.2.41", "v1.2.41", "1.2.41" -> returns [1,2,41]
   if (!tag || typeof tag !== "string") return null;
   const cleaned = tag.trim().replace(/^v/i, "").replace(/^V/i, "");
-  const parts = cleaned.split(".").map(p => parseInt(p, 10) || 0);
-  return parts;
+  return cleaned.split(".").map(p => parseInt(p, 10) || 0);
 }
 
 function isRemoteNewer(localTag, remoteTag) {
@@ -46,36 +39,43 @@ function isRemoteNewer(localTag, remoteTag) {
   return false;
 }
 
-function safeLogDateUTC() {
-  const d = new Date();
-  return d.toISOString(); // UTC+0
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// ----------------- UPDATE CHECK (GitHub Releases) -----------------
+// ----------------- FETCH AVEC BACKOFF -----------------
+async function fetchWithBackoff(url, options = {}, maxRetries = MAX_RETRIES_429, baseDelay = BASE_DELAY) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.status === 429) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        console.warn(`⚠️ Rate limited (429). Retrying in ${delay / 1000}s... (Attempt ${attempt + 1}/${maxRetries})`);
+        await sleep(delay);
+        continue;
+      }
+      return res;
+    } catch (err) {
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.warn("⚠️ Fetch error:", err.message || err, `Retrying in ${delay / 1000}s`);
+      await sleep(delay);
+    }
+  }
+  throw new Error(`Failed to fetch ${url} after ${maxRetries} retries`);
+}
+
+// ----------------- UPDATE CHECK -----------------
 async function checkForUpdates() {
   try {
-    const res = await fetch(GITHUB_RELEASES_LATEST, {
-      headers: { "User-Agent": "roblox-stats-bot" },
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
-    });
-    if (!res.ok) {
-      console.warn(`⚠️ Update check HTTP ${res.status} — skipping check`);
-      return;
-    }
+    const res = await fetchWithBackoff(GITHUB_RELEASES_LATEST, { headers: { "User-Agent": "roblox-stats-bot" } });
+    if (!res.ok) return;
     const json = await res.json();
     const tag = json.tag_name || json.name || null;
     if (!tag) return;
 
     if (isRemoteNewer(LOCAL_VERSION, tag)) {
-      console.log("------------------------------------------------------------");
-      console.log(`⚠️  Update available! Current: ${LOCAL_VERSION}, Latest: ${tag}`);
-      console.log("");
-      console.log("To update the bot, run:");
-      console.log("  git pull");
-      console.log("");
-      console.log("Or download the latest release:");
-      console.log("  " + (json.html_url || "https://github.com/anatoleoN1/roblox-game-stats-bot/releases/latest"));
-      console.log("------------------------------------------------------------\n");
+      console.log("⚠️  Update available! Current:", LOCAL_VERSION, "Latest:", tag);
+      console.log("To update: git pull or download latest release");
     } else {
       console.log(`✅ Bot is up to date (version ${LOCAL_VERSION})\n`);
     }
@@ -84,10 +84,10 @@ async function checkForUpdates() {
   }
 }
 
-// ------------------ API FUNCTIONS ------------------
+// ----------------- API FUNCTIONS -----------------
 async function fetchUniverseId(placeId) {
   try {
-    const res = await fetch(`https://apis.roproxy.com/universes/v1/places/${placeId}/universe`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    const res = await fetchWithBackoff(`https://apis.roproxy.com/universes/v1/places/${placeId}/universe`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data?.universeId ?? null;
@@ -99,105 +99,71 @@ async function fetchUniverseId(placeId) {
 
 async function fetchGameInfo(universeIdParam) {
   try {
-    const res = await fetch(`https://games.roproxy.com/v1/games?universeIds=${universeIdParam}`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    const res = await fetchWithBackoff(`https://games.roproxy.com/v1/games?universeIds=${universeIdParam}`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+    const entry = data?.data?.[0];
+    gameName = entry?.name ?? "Roblox Game";
 
-    if (!data || !Array.isArray(data.data) || data.data.length === 0) {
-      console.warn("⚠️ Roblox API returned no game info.");
-      gameName = "Unknown Game";
-    } else {
-      const entry = data.data[0];
-      gameName = entry?.name ?? "Roblox Game";
-    }
-
-    // icon
+    // fetch icon
     try {
-      const iconRes = await fetch(`https://thumbnails.roproxy.com/v1/games/icons?universeIds=${universeIdParam}&size=256x256&format=Png`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+      const iconRes = await fetchWithBackoff(`https://thumbnails.roproxy.com/v1/games/icons?universeIds=${universeIdParam}&size=256x256&format=Png`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
       if (iconRes.ok) {
         const iconData = await iconRes.json();
         if (iconData?.data?.[0]?.imageUrl) gameIcon = iconData.data[0].imageUrl;
-        else console.warn("⚠️ No icon returned");
-      } else {
-        console.warn("⚠️ Icon fetch HTTP", iconRes.status);
       }
-    } catch (err) {
-      console.warn("⚠️ Failed to fetch icon:", err.message || err);
-    }
-
+    } catch {}
   } catch (err) {
     console.error("❌ Error fetching game info:", err.message || err);
-    gameName = "Unknown Game";
   }
 }
 
 async function fetchGameStats(universeIdParam) {
   try {
-    const [statsRes, favRes] = await Promise.all([
-      fetch(`https://games.roproxy.com/v1/games?universeIds=${universeIdParam}`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }),
-      fetch(`https://games.roproxy.com/v1/games/${universeIdParam}/favorites/count`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
-    ]);
+    const statsRes = await fetchWithBackoff(`https://games.roproxy.com/v1/games?universeIds=${universeIdParam}`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    if (!statsRes.ok) throw new Error(`HTTP ${statsRes.status}`);
+    const statsJson = await statsRes.json();
+    const entry = statsJson?.data?.[0];
 
-    if (!statsRes.ok) {
-      console.warn("⚠️ Stats endpoint HTTP", statsRes.status);
-      return { playing: "N/A", visits: "N/A", favorites: "N/A" };
-    }
-    if (!favRes.ok) {
-      console.warn("⚠️ Favorites endpoint HTTP", favRes.status);
-    }
-
-    const statsJson = await statsRes.json().catch(()=>null);
-    const favJson = await favRes.json().catch(()=>null);
-
-    const entry = statsJson?.data?.[0] ?? null;
-    const favoritesCount = favJson?.favoritesCount ?? null;
-
-    if (!entry) {
-      console.warn("⚠️ No stats data returned from Roblox API");
-      return { playing: 0, visits: 0, favorites: favoritesCount ?? 0 };
-    }
+    const favRes = await fetchWithBackoff(`https://games.roproxy.com/v1/games/${universeIdParam}/favorites/count`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    const favoritesCount = (favRes.ok ? (await favRes.json())?.favoritesCount : 0) ?? 0;
 
     return {
-      playing: entry.playing ?? 0,
-      visits: entry.visits ?? 0,
-      favorites: favoritesCount ?? 0
+      playing: entry?.playing ?? 0,
+      visits: entry?.visits ?? 0,
+      favorites: favoritesCount
     };
   } catch (err) {
-    console.error("API error:", err.message || err);
+    console.warn("⚠️ Error fetching stats:", err.message || err);
     return { playing: "N/A", visits: "N/A", favorites: "N/A" };
   }
 }
 
-// ------------------ DISCORD FUNCTIONS ------------------
+// ----------------- DISCORD -----------------
 function buildEmbed(stats) {
-  const utc = new Date().toISOString(); // UTC+0
+  const utc = new Date().toISOString();
   return {
     username: gameName,
     avatar_url: gameIcon,
-    embeds: [
-      {
-        title: `Live Stats — ${gameName}`,
-        color: 0x4fa3ff,
-        fields: [
-          { name: "Players Online", value: `${stats.playing}`, inline: true },
-          { name: "Visits", value: `${stats.visits}`, inline: true },
-          { name: "Favorites", value: `${stats.favorites}`, inline: true }
-        ],
-        footer: {
-          text: "Roblox Stats Discord Bot © 2025 by Anatoleo is licensed under CC BY 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/ | created by @anatoleo, powered by IA. " + LOCAL_VERSION
-        },
-        timestamp: utc
-      }
-    ]
+    embeds: [{
+      title: `Live Stats — ${gameName}`,
+      color: 0x4fa3ff,
+      fields: [
+        { name: "Players Online", value: `${stats.playing}`, inline: true },
+        { name: "Visits", value: `${stats.visits}`, inline: true },
+        { name: "Favorites", value: `${stats.favorites}`, inline: true }
+      ],
+      footer: { text: "Roblox Stats Discord Bot © 2025 by Anatoleo | " + LOCAL_VERSION },
+      timestamp: utc
+    }]
   };
 }
 
 async function updateStats() {
-  // ensure universeId
   if (!universeId) {
     universeId = await fetchUniverseId(PLACE_ID);
     if (!universeId) {
-      console.warn("❌ Could not resolve universeId; will retry next cycle.");
+      console.warn("❌ Could not resolve universeId; retrying next cycle");
       return;
     }
   }
@@ -211,29 +177,27 @@ async function updateStats() {
 
   try {
     if (!discordMessageId) {
-      const res = await fetch(WEBHOOK_URL + "?wait=true", {
+      const res = await fetchWithBackoff(WEBHOOK_URL + "?wait=true", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
       });
-      if (!res.ok) throw new Error(`Discord webhook POST HTTP ${res.status}`);
-      const data = await res.json();
-      discordMessageId = data.id;
-      console.log("✅ First message sent to Discord");
+      if (res.ok) {
+        const data = await res.json();
+        discordMessageId = data.id;
+        console.log("✅ First message sent to Discord");
+      }
     } else {
-      const res = await fetch(`${WEBHOOK_URL}/messages/${discordMessageId}`, {
+      const res = await fetchWithBackoff(`${WEBHOOK_URL}/messages/${discordMessageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
       });
-      if (!res.ok) {
-        console.warn("⚠️ Discord edit responded", res.status);
-      } else {
+      if (res.ok) {
         const now = new Date();
-        const timestamp = now.toLocaleDateString("fr-FR") + " à " + now.toLocaleTimeString("fr-FR");
-        console.log(`♻️ Message updated at ${timestamp}`);
+        console.log(`♻️ Message updated at ${now.toLocaleString("fr-FR")}`);
       }
     }
   } catch (err) {
@@ -241,20 +205,17 @@ async function updateStats() {
   }
 }
 
-// ------------------ MAIN ------------------
+// ----------------- MAIN -----------------
 async function main() {
   console.log("=== ROBLOX STATS BOT → DISCORD ===\n");
-
-  // check for updates
   await checkForUpdates();
 
-  // prompts
   const answers = await inquirer.prompt([
     {
       type: "input",
       name: "gameUrl",
       message: "Enter Roblox game URL:",
-      validate: input => input.includes("roblox.com/games/") || "Invalid Roblox URL"
+      validate: input => /roblox\.com\/games\/\d+/.test(input) || "Invalid Roblox URL"
     },
     {
       type: "input",
@@ -270,24 +231,20 @@ async function main() {
     }
   ]);
 
-  PLACE_ID = answers.gameUrl.split("/")[4];
+  PLACE_ID = answers.gameUrl.match(/roblox\.com\/games\/(\d+)/)[1];
   WEBHOOK_URL = answers.webhookUrl;
 
   if (answers.existingMessage) {
-    const messageAnswer = await inquirer.prompt([
-      {
-        type: "input",
-        name: "messageId",
-        message: "Enter the message ID or full message link:",
-        validate: (input) => input.length > 0 || "Please enter a valid ID or link"
-      }
-    ]);
-
+    const messageAnswer = await inquirer.prompt([{
+      type: "input",
+      name: "messageId",
+      message: "Enter the message ID or full message link:",
+      validate: input => input.length > 0 || "Please enter a valid ID or link"
+    }]);
     const linkParts = messageAnswer.messageId.split("/");
     discordMessageId = linkParts[linkParts.length - 1];
     console.log(`✅ Existing message will be updated: ${discordMessageId}`);
   } else {
-    discordMessageId = null;
     console.log("✅ A new message will be created on Discord");
   }
 
@@ -295,7 +252,6 @@ async function main() {
   console.log(`📩 Discord Webhook: ${WEBHOOK_URL}`);
   console.log(`⏳ Refresh every ${REFRESH_INTERVAL} sec\n`);
 
-  // start interval
   setInterval(updateStats, REFRESH_INTERVAL * 1000);
   updateStats();
 }
