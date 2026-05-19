@@ -1,7 +1,7 @@
 # Roblox Stats → Discord Webhook Bot
 
 ![Node.js CI](https://img.shields.io/badge/node-%3E%3D18-green)  
-![Version](https://img.shields.io/badge/version-1.2.51-blue)  
+![Version](https://img.shields.io/badge/version-2.1.0-blue)  
 ![License](https://img.shields.io/badge/license-CC--BY%204.0-yellow)
 
 A Node.js bot that tracks live statistics of any Roblox game and posts them into a Discord channel via a webhook.  
@@ -130,6 +130,11 @@ Footer: created by @anatoleo, powered by IA. V1.2.11
 
 ---
 ## UPDATES
+#### 2.1.0
+the bot is now unusable on webhook but with Redtrap bot.
+he can respond on the followed commands : !gameadd, !gamelist, !gameremove, !ping
+the discord bot : https://discord.com/oauth2/authorize?client_id=1506382615316267118&permissions=5066550117747776&integration_type=0&scope=bot+applications.commands
+
 #### 1.2.51
 modified the error 429 patch system
 
