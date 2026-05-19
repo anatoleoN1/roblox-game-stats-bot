@@ -17,7 +17,6 @@
   "author": "Anatoleo",
   "license": "CC-BY-4.0",
   "dependencies": {
-    "inquirer": "^12.9.4",
     "node-fetch": "^3.3.2"
   }
 }
