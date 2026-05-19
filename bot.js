@@ -6,7 +6,7 @@ import fs from "fs";
 // ----------------- CHARGEMENT CONFIG -----------------
 const configFile = "./config.json";
 if (!fs.existsSync(configFile)) {
-    fs.writeFileSync(configFile, JSON.stringify({ TOKEN: "MTUwNjM4MjYxNTMxNjl2NzExOA.GP1P_L.1nwL731fVy9nXJaeDNSomHwNfZQOjyGOFukUXO", trackedGames: [] }, null, 2));
+    fs.writeFileSync(configFile, JSON.stringify({ TOKEN: "YOUR_TOCKEN", trackedGames: [] }, null, 2));
     console.error("❌ Le fichier config.json a été créé. Remplis ton TOKEN avant de lancer.");
     process.exit(1);
 }
